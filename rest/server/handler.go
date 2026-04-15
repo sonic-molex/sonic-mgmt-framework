@@ -245,12 +245,21 @@ func trimRestconfPrefix(path string) string {
 }
 
 // isOperationsRequest checks if a request is a RESTCONF operations
-// request (rpc or action)
+// request (rpc) or a YANG 1.1 action request.
+// RPCs use /restconf/operations/ prefix.
+// Actions use /restconf/data/ prefix but are marked via RequestContext.IsAction.
 func isOperationsRequest(r *http.Request) bool {
 	k := strings.Index(r.URL.Path, restconfOperPathPrefix)
-	return k >= 0
-	//TODO handle yang actions.. URL pattern cannot identify action requests.
-	// Works for now as current yang-to-openapi generator does not support them.
+	if k >= 0 {
+		return true
+	}
+	cv := r.Context().Value(requestContextKey)
+	if cv != nil {
+		if rc, ok := cv.(*RequestContext); ok && rc.IsAction {
+			return true
+		}
+	}
+	return false
 }
 
 // translibArgs holds arguments for invoking translib APIs.
@@ -366,6 +375,7 @@ func invokeTranslib(args *translibArgs, rc *RequestContext) (int, []byte, error)
 			ClientVersion: args.version,
 		}
 		res, err1 := translib.Action(req)
+		// TBD: check if the action has output section 204 or 200
 		if err1 == nil {
 			status = 200
 			content = res.Payload

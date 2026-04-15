@@ -26,12 +26,18 @@ func {{ operationId }}(w http.ResponseWriter, r *http.Request) {
 	{% if 'x-rpc' in pathEntry and 'content' in pathEntry["responses"]["204"] %}
 	{% set content = pathEntry["responses"]["204"]["content"] %}
 	{% endif %}
+	{% if 'x-action' in pathEntry and "200" in pathEntry["responses"] and 'content' in pathEntry["responses"]["200"] %}
+	{% set content = pathEntry["responses"]["200"]["content"] %}
+	{% endif %}
 	{% for produce in content.keys() %}
     rc.Produces.Add("{{ produce }}")
 	{% endfor %}
 	{% if 'x-params' in pathEntry.keys() %}
 	{% set varMappings = pathEntry['x-params']['varMapping'] %}
     rc.PMap = server.NameMap{ {% for varMapping in varMappings %}"{{ varMapping['uriName'] }}":"{{ varMapping['yangName'] }}", {% endfor %} }
+	{% endif %}
+	{% if 'x-action' in pathEntry %}
+    rc.IsAction = true
 	{% endif %}
 	server.Process(w, r)
 }

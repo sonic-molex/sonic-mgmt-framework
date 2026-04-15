@@ -53,6 +53,11 @@ type RequestContext struct {
 	// swagger and map them back to yang names while converting
 	// REST paths to TransLib paths.
 	PMap NameMap
+
+	// IsAction indicates this is a YANG 1.1 action request (RFC 7950
+	// Section 7.15). Actions use POST on data paths rather than the
+	// /restconf/operations/ prefix used by RPCs.
+	IsAction bool
 }
 
 type contextkey int

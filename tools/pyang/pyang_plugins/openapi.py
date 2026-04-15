@@ -80,6 +80,11 @@ verb_responses["post"] = {
     "404": {"description": "Not Found"},
     "403": {"description": "Forbidden"},
 }
+verb_responses["action"] = {
+    "204": {"description": "No Content"},
+    "404": {"description": "Not Found"},
+    "403": {"description": "Forbidden"},
+}
 verb_responses["put"] = {
     "201": {"description": "Created"},
     "204": {"description": "No Content"},
@@ -127,6 +132,7 @@ docJson = OrderedDict()
 docJson["config"] = OrderedDict()
 docJson["operstate"] = OrderedDict()
 docJson["operations"] = OrderedDict()
+docJson["actions"] = OrderedDict()
 swaggerDict["openapi"] = "3.0.1"
 swaggerDict["info"] = OrderedDict()
 swaggerDict["servers"] = [{"url": "https://"}]
@@ -161,6 +167,7 @@ def resetDocJson():
     docJson["config"] = OrderedDict()
     docJson["operstate"] = OrderedDict()
     docJson["operations"] = OrderedDict()
+    docJson["actions"] = OrderedDict()
 
 
 def resetSwaggerDict():
@@ -755,6 +762,119 @@ def handle_rpc(child, actXpath, pathstr):
     docObj[verbPathStr]["output"] = copy.deepcopy(jsonPayload_output)
 
 
+def handle_action(child, actXpath, pathstr):
+    """Generate OpenAPI entry for a YANG 1.1 action statement.
+
+    Per RFC 8040 Section 3.6, actions are invoked via:
+        POST {+restconf}/data/<data-resource-identifier>/<action>
+    This differs from RPCs which use /restconf/operations/.
+    """
+    global currentTag
+    global docJson
+    docObj = docJson["actions"]
+    verbPathStr = "/restconf/data" + pathstr
+    verb = "post"
+    customName = getOpId(child)
+    DefName = shortenNodeName(child, customName)
+    opId = "action_" + DefName
+    add_swagger_tag(child.i_module)
+
+    jsonPayload_input = OrderedDict()
+    # build input payload (may be absent if the action has no input section)
+    input_payload = OrderedDict()
+    input_child = child.search_one('input', None, child.i_children)
+    if input_child is not None:
+        build_payload(input_child, input_payload, pathstr, True,
+                      actXpath, True, False, [], jsonPayload_input)
+    input_Defn = "action_input_" + DefName
+    schemasDict[input_Defn] = OrderedDict()
+    schemasDict[input_Defn]["type"] = "object"
+    schemasDict[input_Defn]["properties"] = copy.deepcopy(input_payload)
+
+    # build output payload
+    jsonPayload_output = OrderedDict()
+    output_payload = OrderedDict()
+    output_child = child.search_one('output', None, child.i_children)
+    if output_child is not None:
+        build_payload(output_child, output_payload, pathstr, True,
+                      actXpath, True, False, [], jsonPayload_output)
+    output_Defn = "action_output_" + DefName
+    schemasDict[output_Defn] = OrderedDict()
+    schemasDict[output_Defn]["type"] = "object"
+    schemasDict[output_Defn]["properties"] = copy.deepcopy(output_payload)
+
+    if verbPathStr not in swaggerDict["paths"]:
+        swaggerDict["paths"][verbPathStr] = OrderedDict()
+
+    if verbPathStr not in docObj:
+        docObj[verbPathStr] = OrderedDict()
+
+    swaggerDict["paths"][verbPathStr][verb] = OrderedDict()
+    swaggerDict["paths"][verbPathStr][verb]["tags"] = [currentTag]
+
+    # Set Operation ID
+    swaggerDict["paths"][verbPathStr][verb]["operationId"] = opId
+    swaggerDict["paths"][verbPathStr][verb]["x-operationIdCamelCase"] = snake_to_camel(
+        opId)
+    OpIdDict[swaggerDict["paths"][verbPathStr][verb]["x-operationIdCamelCase"]] = {
+        "path": verbPathStr, "method": "post", "obj": swaggerDict["paths"][verbPathStr][verb]}
+    swaggerDict["paths"][verbPathStr][verb]["x-action"] = True
+
+    # Set Description
+    desc = child.search_one('description')
+    if desc is None:
+        desc = ''
+    else:
+        desc = desc.arg
+    docObj[verbPathStr]["description"] = copy.deepcopy(desc)
+    desc = "OperationId: " + opId + "\n" + desc
+    swaggerDict["paths"][verbPathStr][verb]["description"] = desc
+    verbPath = swaggerDict["paths"][verbPathStr][verb]
+
+    # Path parameters from parent list keys
+    metadata = []
+    keyNodesInPath = []
+    paramsList = []
+    mk_path_refine(child, metadata, keyNodesInPath, False, paramsList)
+    verbPath["parameters"] = []
+    for meta in metadata:
+        metaTag = OrderedDict()
+        metaTag["name"] = meta["name"]
+        metaTag["in"] = "path"
+        metaTag["required"] = True
+        metaTag["schema"] = copy.deepcopy(meta["schema"])
+        metaTag["description"] = meta["desc"]
+        verbPath["parameters"].append(metaTag)
+
+    # Request payload (only if the action has an input section with children)
+    input_key = child.i_module.i_modulename + ':input'
+    if input_key in input_payload and len(input_payload[input_key]) > 0:
+        verbPath["requestBody"] = OrderedDict()
+        verbPath["requestBody"]["content"] = OrderedDict()
+        verbPath["requestBody"]["required"] = True
+        verbPath["requestBody"]["content"]["application/yang-data+json"] = OrderedDict()
+        bodyTag = verbPath["requestBody"]["content"]["application/yang-data+json"]
+        bodyTag["schema"] = OrderedDict()
+        bodyTag["schema"]["$ref"] = "#/components/schemas/" + input_Defn
+
+    # Response payload — RFC 8040 Section 3.6:
+    # 200 OK with output, 204 No Content without output
+    verbPath["responses"] = copy.deepcopy(
+        merge_two_dicts(responses, verb_responses["action"]))
+    output_key = child.i_module.i_modulename + ':output'
+    if output_key in output_payload and len(output_payload[output_key]) > 0:
+        verbPath["responses"]["200"] = OrderedDict()
+        verbPath["responses"]["200"]["description"] = "Ok"
+        verbPath["responses"]["200"]["content"] = OrderedDict()
+        verbPath["responses"]["200"]["content"]["application/yang-data+json"] = OrderedDict()
+        verbPath["responses"]["200"]["content"]["application/yang-data+json"]["schema"] = OrderedDict()
+        verbPath["responses"]["200"]["content"]["application/yang-data+json"]["schema"]["$ref"] = "#/components/schemas/" + output_Defn
+
+    docObj[verbPathStr]["parameters"] = []
+    docObj[verbPathStr]["input"] = copy.deepcopy(jsonPayload_input)
+    docObj[verbPathStr]["output"] = copy.deepcopy(jsonPayload_output)
+
+
 def walk_child(child):
     global XpathToBodyTagDict
     global XpathToBodyTagDict_with_config_false
@@ -773,6 +893,11 @@ def walk_child(child):
     if child.keyword == "rpc":
         add_swagger_tag(child.i_module)
         handle_rpc(child, actXpath, pathstr)
+        return
+
+    if child.keyword == "action":
+        add_swagger_tag(child.i_module)
+        handle_action(child, actXpath, pathstr)
         return
 
     if child.keyword in ["list", "container", "leaf", "leaf-list"]:
@@ -1144,6 +1269,9 @@ def build_payload(child, payloadDict, uriPath="", oneInstance=False, Xpath="", f
 
     if hasattr(child, 'i_children'):
         for ch in child.i_children:
+            # Skip YANG 1.1 action nodes; they are handled by walk_child/handle_action
+            if ch.keyword == "action":
+                continue
             if child.keyword == "choice" and globalCtx.opts.no_oneof is not None:
                 oneOfEntry = OrderedDict()
                 oneOfEntry["type"] = "object"

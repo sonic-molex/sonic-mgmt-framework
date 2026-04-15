@@ -694,6 +694,30 @@ func TestProcessRPC_error(t *testing.T) {
 	verifyResponse(t, w, 405)
 }
 
+func TestProcessAction(t *testing.T) {
+	r := prepareRequest(t, "POST", "/api-tests:sample/my-action",
+		`{"api-tests:input":{"message":"hello"}}`)
+	rc, r := GetContext(r)
+	rc.IsAction = true
+
+	w := httptest.NewRecorder()
+	Process(w, r)
+	verifyResponseData(t, w, 200, jsonObj{
+		"api-tests:output": map[string]interface{}{"message": "hello"},
+	})
+}
+
+func TestProcessAction_error(t *testing.T) {
+	r := prepareRequest(t, "POST", "/api-tests:sample/my-action",
+		`{"api-tests:input":{"error-type":"not-supported"}}`)
+	rc, r := GetContext(r)
+	rc.IsAction = true
+
+	w := httptest.NewRecorder()
+	Process(w, r)
+	verifyResponse(t, w, 405)
+}
+
 func TestProcessPATCH(t *testing.T) {
 	w := httptest.NewRecorder()
 	Process(w, prepareRequest(t, "PATCH", "/api-tests:sample", "{}"))
