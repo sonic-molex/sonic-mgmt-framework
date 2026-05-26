@@ -1,0 +1,66 @@
+{# --- Define variables with defalut values --- #}
+{% set str_unit_db = 'dB' %}
+{% set str_unit_dbm = 'dBm' %}
+{% set str_unit_ma = 'mA' %}
+{% set cfg_ns = namespace(attenuation_mode='N/A', target_output_power='N/A', attenuation='N/A', enabled='N/A') %}
+{% set state_ns = namespace(attenuation_mode='N/A', target_output_power='N/A', attenuation='N/A', enabled='N/A') %}
+{% set state_actual_attenuation_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_output_power_total_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_optical_return_loss_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{# --- Parse data from json_output  --- #}
+{% set voa_list = json_output['openconfig-optical-attenuator:attenuator'] %}
+{% for voa in voa_list %}
+{% set voa_config = voa['config'] %}
+{% set voa_state = voa['state'] %}
+{% set voa_name = voa['name'] %}
+{# --- Parse voa config data --- #}
+{% if 'attenuation-mode' in voa_config %}
+{% set cfg_ns.attenuation_mode = voa_config['attenuation-mode'].split(':')[1] %}
+{% endif %}
+{% if 'attenuation' in voa_config %}
+{#% set cfg_ns.attenuation = '%0.2f' | format(voa_config['attenuation']|float) + str_unit_db %#}
+{% set cfg_ns.attenuation = '%s' | format(voa_config['attenuation']) + str_unit_db %}
+{% endif %}
+{% if 'target-output-power' in voa_config %}
+{% set cfg_ns.target_output_power = '%s' | format(voa_config['target-output-power']) + str_unit_dbm %}
+{% endif %}
+{% if 'enabled' in voa_config %}
+{% set cfg_ns.enabled = voa_config['enabled'] %}
+{#{% if voa_config['enabled'] == True %}#}
+{#{% set cfg_ns.enabled = 'enable' %}#}
+{#{% else %}#}
+{#{% set cfg_ns.enabled = 'disable' %}#}
+{#{% endif %}#}
+{% endif %}
+{# --- Parse voa state data --- #}
+{% if 'actual-attenuation' in voa_state %}
+{% if 'instant' in voa_state['actual-attenuation'] %}
+{% set state_actual_attenuation_ns.instant = '%s' | format(voa_state['actual-attenuation']['instant']) + str_unit_db %}
+{% endif %}
+{% endif %}
+{% if 'output-power-total' in voa_state %}
+{% if 'instant' in voa_state['output-power-total'] %}
+{% set state_output_power_total_ns.instant = '%s' | format(voa_state['output-power-total']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'optical-return-loss' in voa_state %}
+{% if 'instant' in voa_state['optical-return-loss'] %}
+{% set state_optical_return_loss_ns.instant = '%s' | format(voa_state['optical-return-loss']['instant']) + str_unit_db %}
+{% endif %}
+{% endif %}
+
+{# --- Output data --- #}
+{{voa_name}} {{' config'}}
+{{'    '}}{{'attenuation-mode'.ljust(20)}}{{' : '}}{{cfg_ns.attenuation_mode}}
+{{'    '}}{{'attenuation'.ljust(20)}}{{' : '}}{{cfg_ns.attenuation}}
+{# {{'    '}}{{'target-output-power'.ljust(20)}}{{' : '}}{{cfg_ns.target_output_power}} #}
+{{'    '}}{{'enabled'.ljust(20)}}{{' : '}}{{cfg_ns.enabled}}
+{{' '}}
+{{voa_name}} {{' state'}}
+{{'    '}}{{'actual-attenuation'.ljust(20)}}{{' : '}}{{state_actual_attenuation_ns.instant}}
+{# {{'    '}}{{'output-power-total'.ljust(20)}}{{' : '}}{{state_output_power_total_ns.instant}} #}
+{# {{'    '}}{{'optical-return-loss'.ljust(20)}}{{' : '}}{{state_optical_return_loss_ns.instant}} #}
+{{' '}}
+{% endfor %}
+
+

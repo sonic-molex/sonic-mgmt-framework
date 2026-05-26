@@ -1,0 +1,234 @@
+{# --- GET /restconf/data/openconfig-gnoi-otdr:optical-time-domain-reflectometer/config-common  --- #}
+{% if 'openconfig-gnoi-otdr:config-common' in json_output %}
+{% set cfg_cmn_obj = json_output['openconfig-gnoi-otdr:config-common'] %}
+
+{# ---  json_output['openconfig-gnoi-otdr:config-common']['fiber-profile']  --- #}
+{% set fiber_profile_ns = namespace(refractive_index='N/A', backscatter_index='N/A', reflectance_threshold='N/A', splice_loss_thr='N/A', fiber_end_threshold='N/A') %}
+{% if 'fiber-profile' in cfg_cmn_obj %}
+{% set fiber_profile_obj = cfg_cmn_obj['fiber-profile'] %}
+{% if 'refractive-index' in fiber_profile_obj %}
+{% set fiber_profile_ns.refractive_index = fiber_profile_obj['refractive-index'] %}
+{% endif %}
+{% if 'backscatter-index' in fiber_profile_obj %}
+{% set fiber_profile_ns.backscatter_index = fiber_profile_obj['backscatter-index'] %}
+{% endif %}
+{% if 'reflectance-threshold' in fiber_profile_obj %}
+{% set fiber_profile_ns.reflectance_threshold = fiber_profile_obj['reflectance-threshold'] %}
+{% endif %}
+{% if 'splice-loss-thr' in fiber_profile_obj %}
+{% set fiber_profile_ns.splice_loss_thr = fiber_profile_obj['splice-loss-thr'] %}
+{% endif %}
+{% if 'fiber-end-threshold' in fiber_profile_obj %}
+{% set fiber_profile_ns.fiber_end_threshold = fiber_profile_obj['fiber-end-threshold'] %}
+{% endif %}
+{# --- Output "fiber-profile" config data --- #}
+{{"Fiber profile"}} {{' config'}} 
+{{'    '}}{{'refractive-index'.ljust(25)}}{{' : '}}{{fiber_profile_ns.refractive_index}}
+{{'    '}}{{'backscatter-index'.ljust(25)}}{{' : '}}{{fiber_profile_ns.backscatter_index}}
+{{'    '}}{{'reflectance-threshold'.ljust(25)}}{{' : '}}{{fiber_profile_ns.reflectance_threshold}}
+{{'    '}}{{'splice-loss-thr'.ljust(25)}}{{' : '}}{{fiber_profile_ns.splice_loss_thr}}
+{{'    '}}{{'fiber-end-threshold'.ljust(25)}}{{' : '}}{{fiber_profile_ns.fiber_end_threshold}}
+{{' '}}
+{% endif %}
+
+{# ---  json_output['openconfig-gnoi-otdr:config-common']['scan-types']  --- #}
+{# --- Output "scan-types" config data --- #}
+{{"Scan types"}} {{' config'}} 
+{{'    '}}{{'----------------------------------------------------------------------------------------------------------------'}}
+{{'    '}}{{'scan-type'.ljust(12)}}{{'acquisition-time-s'.ljust(22)}}{{'range-m'.ljust(10)}}{{'pulse-width-ns'.ljust(18)}}{{'wavelength-mhz'.ljust(18)}}{{'sample-resolution-m'.ljust(22)}}{{'fiber-type'.ljust(15)}}
+{{'    '}}{{'----------------------------------------------------------------------------------------------------------------'}}
+{% set scan_type_obj_ns = namespace(scan_type='N/A', acquisition_time_s='N/A', range_m='N/A', pulse_width_ns='N/A', wavelength_mhz='N/A', sample_resolution_m='N/A', fiber_type='N/A') %}
+{% if 'scan-types' in cfg_cmn_obj %}
+{% for scan_type_obj in cfg_cmn_obj['scan-types'] %}
+{% if 'scan-type' in scan_type_obj %}
+{% set scan_type_obj_ns.scan_type = scan_type_obj['scan-type'] %}
+{% endif %}
+{% if 'acquisition-time-s' in scan_type_obj %}
+{% set scan_type_obj_ns.acquisition_time_s = '%s' | format(scan_type_obj['acquisition-time-s']) %}
+{% endif %}
+{% if 'range-m' in scan_type_obj %}
+{% set scan_type_obj_ns.range_m = '%s' | format(scan_type_obj['range-m']) %}
+{% endif %}
+{% if 'pulse-width-ns' in scan_type_obj %}
+{% set scan_type_obj_ns.pulse_width_ns = '%s' | format(scan_type_obj['pulse-width-ns']) %}
+{% endif %}
+{% if 'wavelength-mhz' in scan_type_obj %}
+{% set scan_type_obj_ns.wavelength_mhz = scan_type_obj['wavelength-mhz'] %}
+{% endif %}
+{% if 'sample-resolution-m' in scan_type_obj %}
+{% set scan_type_obj_ns.sample_resolution_m = scan_type_obj['sample-resolution-m'] %}
+{% endif %}
+{% if 'fiber-type' in scan_type_obj %}
+{% set scan_type_obj_ns.fiber_type = scan_type_obj['fiber-type'].split(':')[1] %}
+{% endif %}
+{{'    '}}{{scan_type_obj_ns.scan_type.ljust(12)}}{{scan_type_obj_ns.acquisition_time_s.ljust(22)}}{{scan_type_obj_ns.range_m.ljust(10)}}{{scan_type_obj_ns.pulse_width_ns.ljust(18)}}{{scan_type_obj_ns.wavelength_mhz.ljust(18)}}{{scan_type_obj_ns.sample_resolution_m.ljust(22)}}{{scan_type_obj_ns.fiber_type.ljust(15)}}
+{% set scan_type_obj_ns.scan_type = 'N/A' %}
+{% set scan_type_obj_ns.acquisition_time_s = 'N/A' %}
+{% set scan_type_obj_ns.range_m = 'N/A' %}
+{% set scan_type_obj_ns.pulse_width_ns = 'N/A' %}
+{% set scan_type_obj_ns.wavelength_mhz = 'N/A' %}
+{% set scan_type_obj_ns.sample_resolution_m = 'N/A' %}
+{% set scan_type_obj_ns.fiber_type = 'N/A' %}
+{% endfor %}
+{{' '}}
+{% endif %}
+{% endif %}
+
+{# --- GET /restconf/data/openconfig-gnoi-otdr:optical-time-domain-reflectometer/otdrs/otdr={name}  --- #}
+{% if 'openconfig-gnoi-otdr:otdr' in json_output %}
+{% set otdr_list = json_output['openconfig-gnoi-otdr:otdr'] %}
+
+{% for otdr in otdr_list %}
+{% set cfg_ns = namespace(acquisition_time_s='N/A', range_m='N/A', pulse_width_ns='N/A', wavelength_mhz='N/A', sample_resolution_m='N/A', fiber_type='N/A', refractive_index='N/A', backscatter_index='N/A', reflectance_threshold='N/A', splice_loss_thr='N/A', fiber_end_threshold='N/A') %}
+{% set state_ns = namespace(acquisition_time_s='N/A', range_m='N/A', pulse_width_ns='N/A', wavelength_mhz='N/A', sample_resolution_m='N/A', fiber_type='N/A', refractive_index='N/A', backscatter_index='N/A', reflectance_threshold='N/A', splice_loss_thr='N/A', fiber_end_threshold='N/A', status='N/A') %}
+{% set otdr_name = otdr['name'] %}
+{% set otdr_config = otdr['config'] %}
+{% set otdr_state = otdr['state'] %}
+{% set otdr_scan_results = otdr['scan-results'] %}
+{# --- parse port config --- #}
+{% if 'acquisition-time-s' in otdr_config %}
+{% set cfg_ns.acquisition_time_s = '%s' | format(otdr_config['acquisition-time-s']) %}
+{% endif %}
+{% if 'range-m' in otdr_config %}
+{% set cfg_ns.range_m = '%s' | format(otdr_config['range-m']) %}
+{% endif %}
+{% if 'pulse-width-ns' in otdr_config %}
+{% set cfg_ns.pulse_width_ns = '%s' | format(otdr_config['pulse-width-ns']) %}
+{% endif %}
+{% if 'wavelength-mhz' in otdr_config %}
+{% set cfg_ns.wavelength_mhz = otdr_config['wavelength-mhz'] %}
+{% endif %}
+{% if 'sample-resolution-m' in otdr_config %}
+{% set cfg_ns.sample_resolution_m = otdr_config['sample-resolution-m'] %}
+{% endif %}
+{% if 'fiber-type' in otdr_config %}
+{% set cfg_ns.fiber_type = otdr_config['fiber-type'].split(':')[1] %}
+{% endif %}
+{% if 'refractive-index' in otdr_config %}
+{% set cfg_ns.refractive_index = otdr_config['refractive-index'] %}
+{% endif %}
+{% if 'backscatter-index' in otdr_config %}
+{% set cfg_ns.backscatter_index = otdr_config['backscatter-index'] %}
+{% endif %}
+{% if 'reflectance-threshold' in otdr_config %}
+{% set cfg_ns.reflectance_threshold = otdr_config['reflectance-threshold'] %}
+{% endif %}
+{% if 'splice-loss-thr' in otdr_config %}
+{% set cfg_ns.splice_loss_thr = otdr_config['splice-loss-thr'] %}
+{% endif %}
+{% if 'fiber-end-threshold' in otdr_config %}
+{% set cfg_ns.fiber_end_threshold = otdr_config['fiber-end-threshold'] %}
+{% endif %}
+{# --- parse port state --- #}
+{% if 'status' in otdr_status %}
+{% set state_ns.status = otdr_status['status'] %}
+{% endif %}
+{# --- Output port config and state --- #}
+{{otdr_name}} {{' config'}}
+{{'    '}}{{'acquisition-time-s'.ljust(25)}}{{' : '}}{{cfg_ns.acquisition_time_s}}
+{{'    '}}{{'range-m'.ljust(25)}}{{' : '}}{{cfg_ns.range_m}}
+{{'    '}}{{'pulse-width-ns'.ljust(25)}}{{' : '}}{{cfg_ns.pulse_width_ns}}
+{{'    '}}{{'wavelength-mhz'.ljust(25)}}{{' : '}}{{cfg_ns.wavelength_mhz}}
+{{'    '}}{{'sample-resolution-m'.ljust(25)}}{{' : '}}{{cfg_ns.sample_resolution_m}}
+{{'    '}}{{'fiber-type'.ljust(25)}}{{' : '}}{{cfg_ns.fiber_type}}
+
+{{'    '}}{{'refractive-index'.ljust(25)}}{{' : '}}{{cfg_ns.refractive_index}}
+{{'    '}}{{'backscatter-index'.ljust(25)}}{{' : '}}{{cfg_ns.backscatter_index}}
+{{'    '}}{{'reflectance-threshold'.ljust(25)}}{{' : '}}{{cfg_ns.reflectance_threshold}}
+{{'    '}}{{'splice-loss-thr'.ljust(25)}}{{' : '}}{{cfg_ns.splice_loss_thr}}
+{{'    '}}{{'fiber-end-threshold'.ljust(25)}}{{' : '}}{{cfg_ns.fiber_end_threshold}}
+{{' '}}
+{{otdr_name}} {{' state'}}
+{{'    '}}{{'status'.ljust(25)}}{{' : '}}{{state_ns.status}}
+{{' '}}
+{{otdr_name}} {{' scan results'}}
+{# --- parse port scan-results --- #}
+{% if 'traces' in otdr_scan_results %}
+{% set otdr_traces_list = otdr_scan_results['traces'] %}
+{% set traces_ns = namespace(total_length_m='N/A', total_loss_db='N/A', optical_return_loss_db='N/A', average_loss_db_km='N/A', discovered_fiber_type='N/A', event_count='N/A', sor_file='N/A', baseline='N/A') %}
+{% set event_ns = namespace(event_id='N/A', event_type='N/A', distance_m='N/A', loss_db='N/A', reflection_db='N/A') %}
+{% for otdr_traces in otdr_traces_list %}
+{% set completion_time = otdr_traces['completion-time'] %}
+{% set events_list = otdr_traces['events'] %}
+{% if 'total-length-m' in otdr_traces %}
+{% set traces_ns.total_length_m = otdr_traces['total-length-m'] %}
+{% endif %}
+{% if 'total-loss-db' in otdr_traces %}
+{% set traces_ns.total_loss_db = otdr_traces['total-loss-db'] %}
+{% endif %}
+{% if 'optical-return-loss-db' in otdr_traces %}
+{% set traces_ns.optical_return_loss_db = otdr_traces['optical-return-loss-db'] %}
+{% endif %}
+{% if 'average-loss-db-km' in otdr_traces %}
+{% set traces_ns.average_loss_db_km = otdr_traces['average-loss-db-km'] %}
+{% endif %}
+{% if 'discovered-fiber-type' in otdr_traces %}
+{% set traces_ns.discovered_fiber_type = otdr_traces['discovered-fiber-type'].split(':')[1] %}
+{% endif %}
+{% if 'event-count' in otdr_traces %}
+{% set traces_ns.event_count = otdr_traces['event-count'] %}
+{% endif %}
+{% if 'sor-file' in otdr_traces %}
+{% set traces_ns.sor_file = otdr_traces['sor-file'] %}
+{% endif %}
+{% if 'baseline' in otdr_traces %}
+{% set traces_ns.baseline = otdr_traces['baseline'] %}
+{% endif %}
+{{"traces"}} {{"["}}{{loop.index}}{{'/'}}{{loop.length}}{{"]"}}
+{{'    '}}{{'completion-time'.ljust(25)}}{{' : '}}{{completion_time}}
+{{'    '}}{{'total-length-m'.ljust(25)}}{{' : '}}{{traces_ns.total_length_m}}
+{{'    '}}{{'total-loss-db'.ljust(25)}}{{' : '}}{{traces_ns.total_loss_db}}
+{{'    '}}{{'optical-return-loss-db'.ljust(25)}}{{' : '}}{{traces_ns.optical_return_loss_db}}
+{{'    '}}{{'average-loss-db-km'.ljust(25)}}{{' : '}}{{traces_ns.average_loss_db_km}}
+{{'    '}}{{'discovered-fiber-type'.ljust(25)}}{{' : '}}{{traces_ns.discovered_fiber_type}}
+{{'    '}}{{'sor-file'.ljust(25)}}{{' : '}}{{traces_ns.sor_file}}
+{{'    '}}{{'baseline'.ljust(25)}}{{' : '}}{{traces_ns.baseline}}
+{{'    '}}{{'event-count'.ljust(25)}}{{' : '}}{{traces_ns.event_count}}
+{% if events_list %}
+{{'    '}}{{'----------------------------------------------------------------'}}
+{{'    '}}{{'event-id'.ljust(10)}}{{'event-type'.ljust(16)}}{{'distance-m'.ljust(12)}}{{'loss-db'.ljust(10)}}{{'reflection-db'.ljust(20)}}
+{{'    '}}{{'----------------------------------------------------------------'}}
+{% endif %}
+{% for event in events_list %}
+{% set event_ns.event_id = 'N/A' %}
+{% set event_ns.event_type = 'N/A' %}
+{% set event_ns.distance_m = 'N/A' %}
+{% set event_ns.loss_db = 'N/A' %}
+{% set event_ns.reflection_db = 'N/A' %}
+{% if 'event-id' in event %}
+{% set event_ns.event_id = "%s" | format(event['event-id']) %}
+{% endif %}
+{% if 'event-type' in event %}
+{% set event_ns.event_type = event['event-type'] %}
+{% endif %}
+{% if 'distance-m' in event %}
+{% set event_ns.distance_m = "%s" | format(event['distance-m']) %}
+{% endif %}
+{% if 'loss-db' in event %}
+{% set event_ns.loss_db = "%s" | format(event['loss-db']) %}
+{% endif %}
+{% if 'reflection-db' in event %}
+{# {% set event_ns.reflection_db = "%s" | format(event['reflection-db']) %} #}
+{% set event_ns.reflection_db = event['reflection-db'] %}
+{% endif %}
+{{'    '}}{{event_ns.event_id.ljust(10)}}{{event_ns.event_type.ljust(16)}}{{event_ns.distance_m.ljust(12)}}{{event_ns.loss_db.ljust(10)}}{{event_ns.reflection_db.ljust(20)}}
+{% endfor %}
+{{' '}}
+{% set traces_ns.total_length_m = 'N/A' %}
+{% set traces_ns.total_loss_db = 'N/A' %}
+{% set traces_ns.optical_return_loss_db = 'N/A' %}
+{% set traces_ns.average_loss_db_km = 'N/A' %}
+{% set traces_ns.discovered_fiber_type = 'N/A' %}
+{% set traces_ns.sor_file = 'N/A' %}
+{% set traces_ns.baseline = 'N/A' %}
+{% set traces_ns.event_count = 'N/A' %}
+{% set traces_ns.baseline = 'N/A' %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+
+

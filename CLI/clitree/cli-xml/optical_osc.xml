@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+
+<!--=========================================================================-->
+  <PTYPE
+      name="OSC_NAME"
+      method="select"
+      pattern="osc0-0(OSC0-0)"
+      help=""
+      />
+<!--=========================================================================-->
+  <VIEW name="enable-view">
+    <COMMAND name="show osc" help="Display OSC information"> 
+      <PARAM name="value" help="" ptype="OSC_NAME"></PARAM>
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_osc.py get_supervisory_channel_osc show_osc.j2 ${value} </ACTION>
+    </COMMAND>
+  </VIEW>
+
+  <VIEW name="configure-view">
+      <!-- OSC command -->
+      <COMMAND name="osc" help="OSC Module configuration"> </COMMAND>
+      <COMMAND name="osc osc0-0" help="OSC0-0 configuration"> </COMMAND>
+      <COMMAND name="osc osc0-0 enabled" help="SFP enable configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_osc.py patch_supervisory_channel_osc_enabled ${value} ${__full_line} </ACTION>
+      </COMMAND>
+
+  </VIEW>
+</CLISH_MODULE>

@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+<!--=========================================================================-->
+  <PTYPE
+      name="MONITOR_PORT_STRING_31"
+      pattern="^[[:print:]]{1,31}$"
+      help="STRING"
+      />
+  <PTYPE
+      name="CHANNEL_MONITOR_NAME"
+      method="select"
+      pattern="ocm0-0(OCM0-0) ocm0-1(OCM0-1) ocm0-2(OCM0-2) ocm0-3(OCM0-3) ocm0-4(OCM0-4)"
+      help=""
+      />
+<!--=========================================================================-->
+  <VIEW name="enable-view">
+    <COMMAND name="show ocm" help="Display ocm information"> </COMMAND>
+    <COMMAND name="show ocm channels" help="Display ocm channels information"> 
+      <PARAM name="value" help="" ptype="CHANNEL_MONITOR_NAME"></PARAM>
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_ocm.py get_ocm_port_channels show_ocm.j2 ${value} </ACTION>
+    </COMMAND>
+    <COMMAND name="show ocm config" help="Display ocm config information"> </COMMAND>
+    <COMMAND name="show ocm config channel-monitor" help="Display ocm config information">
+      <PARAM name="value" help="" ptype="CHANNEL_MONITOR_NAME"></PARAM>
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_ocm.py get_ocm_port_config show_ocm.j2 ${value} </ACTION>
+    </COMMAND>
+  </VIEW>
+
+  <VIEW name="configure-view">
+      <!-- Ocm Module Entry -->
+      <COMMAND name="ocm" help="Ocm Module configuration"></COMMAND>
+
+      <COMMAND name="ocm channel-monitor" help="Target gain configuration"> 
+          <!-- ocm channel-monitor <name> monitor-port <value> -->
+          <PARAM name="channel-monitor-name" help="" ptype="CHANNEL_MONITOR_NAME">
+            <PARAM name="monitor-port" help="monitor port configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="value" help="monitor port value" ptype="MONITOR_PORT_STRING_31">
+              </PARAM>
+            </PARAM>
+          </PARAM>
+        <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_ocm.py patch_ocm_monitor_port ${channel-monitor-name} ${__full_line} </ACTION>
+      </COMMAND>
+  </VIEW>
+</CLISH_MODULE>

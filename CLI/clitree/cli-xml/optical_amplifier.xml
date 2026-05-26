@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+<!--=========================================================================-->
+  <PTYPE
+    name="AMPLIFIER_GAIN_RANGE"
+    method="select"
+    pattern="low(LOW_GAIN_RANGE) mid(MID_GAIN_RANGE) high(HIGH_GAIN_RANGE) fixed(FIXED_GAIN_RANGE)"
+    help="low|mid|high|fixed"
+    />
+  <PTYPE
+    name="AMPLIFIER_FIBER_TYPE"
+    method="select"
+    pattern="dsf(DSF) leaf(LEAF) ssmf(SSMF) twc(TWC) twrs(TWRS)"
+    help=""
+    />
+  <PTYPE
+    name="AMPLIFIER_AMP_MOD"
+    method="select"
+    pattern="constant-power(CONSTANT_POWER) constant-gain(CONSTANT_GAIN)"
+    help=""
+    />
+<!--=========================================================================-->
+
+  <VIEW name="enable-view">
+    <COMMAND name="show amplifier" help="Display amplifier information"> 
+      <PARAM name="if-edfa-name" help="" mode="switch" ptype="SUBCOMMAND">
+         <PARAM name="oa0-1" help="Display PA information" ptype="SUBCOMMAND" mode="subcommand"></PARAM>
+         <PARAM name="oa0-0" help="Display BA information" ptype="SUBCOMMAND" mode="subcommand"></PARAM>
+      </PARAM>
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py get_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier show_amplifier.j2 ${if-edfa-name} </ACTION>
+    </COMMAND>
+  </VIEW>
+
+  <VIEW name="configure-view">
+      <COMMAND name="amplifier" help="Amplifier Module configuration"> </COMMAND>
+
+      <!-- PA command -->
+      <COMMAND name="amplifier oa0-1" help="PA configuration"> </COMMAND>
+      <COMMAND name="amplifier oa0-1 target-gain" help="Target gain configuration"> 
+           <PARAM name="value" help="Input target gain value ([15.00,25.00]), Unit: dB" ptype="DECIMAL_FRACTION_2">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_target_gain ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-1 target-gain-tilt" help="Target gain tilt configuration"> 
+           <PARAM name="value" help="Input target gain tilt value ([-2,0]), Unit: dB" ptype="DECIMAL_FRACTION_2">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_target_gain_tilt ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-1 target-output-power" help="Target output power configuration"> 
+           <PARAM name="value" help="Input target output power value([-60.00,30.00]), Unit: dBm" ptype="DECIMAL_FRACTION_2">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_target_output_power ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-1 gain-range" help="Gain range configuration"> 
+           <PARAM name="value" help="" ptype="AMPLIFIER_GAIN_RANGE">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_gain_range ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-1 amp-mode" help="Amp mode configuration"> 
+           <PARAM name="value" help="" ptype="AMPLIFIER_AMP_MOD">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_amp_mode ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-1 enabled" help="enabled configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_enabled ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      
+      <COMMAND name="amplifier oa0-1 autolos" help="autolos configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_com_oplink_amplifier_ext_optical_amplifier_amplifiers_amplifier_config_autolos ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-1 apr-enabled" help="apr enable configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_com_oplink_amplifier_ext_optical_amplifier_amplifiers_amplifier_config_apr_enabled ${value} ${__full_line} </ACTION>
+      </COMMAND>
+
+      <!-- BA command -->
+      <COMMAND name="amplifier oa0-0" help="BA configuration"> </COMMAND>
+      <COMMAND name="amplifier oa0-0 target-gain" help="Target gain configuration"> 
+           <PARAM name="value" help="Input target gain value ([15.00,25.00]), Unit: dB" ptype="DECIMAL_FRACTION_2">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_target_gain ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-0 target-gain-tilt" help="Target gain tilt configuration"> 
+           <PARAM name="value" help="Input target gain tilt value ([-2,0]), Unit: dB" ptype="DECIMAL_FRACTION_2">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_target_gain_tilt ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-0 target-output-power" help="Target output power configuration"> 
+           <PARAM name="value" help="Input target output power value([-60.00,30.00]), Unit: dBm" ptype="DECIMAL_FRACTION_2">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_target_output_power ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-0 gain-range" help="Gain range configuration"> 
+           <PARAM name="value" help="" ptype="AMPLIFIER_GAIN_RANGE">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_gain_range ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-0 amp-mode" help="Amp mode configuration"> 
+           <PARAM name="value" help="" ptype="AMPLIFIER_AMP_MOD">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_amp_mode ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-0 enabled" help="enabled configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_openconfig_optical_amplifier_optical_amplifier_amplifiers_amplifier_config_enabled ${value} ${__full_line} </ACTION>
+      </COMMAND>
+
+      <COMMAND name="amplifier oa0-0 autolos" help="autolos configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_com_oplink_amplifier_ext_optical_amplifier_amplifiers_amplifier_config_autolos ${value} ${__full_line} </ACTION>
+      </COMMAND>
+      <COMMAND name="amplifier oa0-0 apr-enabled" help="apr enable configuration"> 
+           <PARAM name="value" help="" ptype="ENA_DISA">
+           </PARAM>
+           <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_amplifier.py patch_com_oplink_amplifier_ext_optical_amplifier_amplifiers_amplifier_config_apr_enabled ${value} ${__full_line} </ACTION>
+      </COMMAND>
+
+  </VIEW>
+</CLISH_MODULE>

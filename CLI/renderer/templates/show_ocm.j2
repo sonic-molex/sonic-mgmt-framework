@@ -1,0 +1,44 @@
+{# --- Output channel data from json_output  --- #}
+{% if 'openconfig-channel-monitor:channels' in json_output and 'channel' in json_output['openconfig-channel-monitor:channels'] %}
+{{'--------------------------------------------------------------------------------'}}
+{{'Index'.ljust(10)}}{{'LowerFrequency (MHZ)'.ljust(25)}}{{'UpperFrequency (MHZ)'.ljust(25)}}{{'Power (dBm)'.ljust(20)}}
+{{'--------------------------------------------------------------------------------'}}
+{% set channel_list = json_output['openconfig-channel-monitor:channels']['channel'] %}
+{% for channel in channel_list %}
+{% set lower_freq = 'N/A' %}
+{% set upper_freq = 'N/A' %}
+{% set power = 'N/A' %}
+{% if 'lower-frequency' in channel %}
+{% set lower_freq = channel['lower-frequency'] %}
+{% endif %}
+{% if 'upper-frequency' in channel %}
+{% set upper_freq = channel['upper-frequency'] %}
+{% endif %}
+{% if 'state' in channel and 'power' in channel['state'] %}
+{% set power = channel['state']['power'] %}
+{% endif %}
+{% set chan_index = loop.index | string %}
+{{chan_index.ljust(10)}}{{lower_freq.ljust(25)}}{{upper_freq.ljust(25)}}{{power.ljust(20)}}
+{% endfor %}
+{% endif %}
+
+{# --- Output config data from json_output  --- #}
+{% if 'openconfig-channel-monitor:config' in json_output %}
+{% set monitor_port = 'N/A' %}
+{% set ocm_name = 'N/A' %}
+{% set config_obj = json_output['openconfig-channel-monitor:config'] %}
+{% if 'name' in config_obj %}
+{% set ocm_name = config_obj['name'] %}
+{% endif %}
+{% if 'monitor-port' in config_obj %}
+{% set monitor_port = config_obj['monitor-port'] %}
+{% endif %}
+{# --- Output data --- #}
+{# {{ocm_name}} {{' config'}} #}
+{{'    '}}{{'name'.ljust(20)}}{{' : '}}{{ocm_name}}
+{{'    '}}{{'monitor-port'.ljust(20)}}{{' : '}}{{monitor_port}}
+{{' '}}
+{% endif %}
+
+
+

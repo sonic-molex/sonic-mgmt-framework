@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+<!--=========================================================================-->
+  <PTYPE
+      name="MONITOR_PORT_STRING_31"
+      pattern="^[[:print:]]{1,31}$"
+      help="STRING"
+      />
+  <PTYPE
+      name="OTDR_NAME"
+      method="select"
+      pattern="otdr0-0(OTDR0-0) otdr0-1(OTDR0-1) otdr0-2(OTDR0-2)"
+      help=""
+      />
+  <PTYPE
+      name="OTDR_CONFIGURABLE_SCAN_TYPE"
+      method="select"
+      pattern="short(short) medium(medium) long(long)"
+      help=""
+      />
+    <PTYPE
+      name="OTDR_SCAN_TYPE_ALL"
+      method="select"
+      pattern="short(short) medium(medium) long(long) auto(auto) customized(customized)"
+      help=""
+      />
+  <PTYPE
+      name="OTDR_ACQUISITION_TIME_S"
+      method="integer"
+      pattern="10..180"
+      help="Unit: s"
+      />
+  <PTYPE
+      name="OTDR_RANGE_M"
+      method="integer"
+      pattern="0..128000"
+      help="Unit: m"
+      /> 
+  <PTYPE
+      name="OTDR_PULSE_WIDTH_NS"
+      method="integer"
+      pattern="0..20000"
+      help="Unit: ns"
+      />
+  <PTYPE
+      name="OTDR_WAVELENGTH_MHZ"
+      method="integer"
+      pattern="1..400000000"
+      help="Unit: MHz"
+      />
+  <PTYPE
+      name="OTDR_SAMPLE_RESOLUTION_M"
+      method="integer"
+      pattern="0.00..160.00"
+      help="Unit: m"
+      />
+  <PTYPE
+      name="OTDR_FIBER_TYPE"
+      method="select"
+      pattern="dsf(DSF) leaf(LEAF) ssmf(SSMF) twc(TWC) twrs(TWRS)"
+      help=""
+      />
+  <PTYPE
+      name="OTDR_SCAN_OPERATION"
+      method="select"
+      pattern="start(start)) stop(stop)"
+      help=""
+      />
+  <PTYPE name="OTDR_REFRACTIVE_INDEX" pattern="^[+]?[1-9]*[0-9]?(\.[0-9]{1,6})?$" help="range: 1.400000..1.700000"/>
+<!--=========================================================================-->
+  <VIEW name="enable-view">
+    <COMMAND name="show otdr" help="Display otdr information"> </COMMAND>
+    <COMMAND name="show otdr config-common" help="Display otdr config common information">
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_otdr.py get_otdr_config_common show_otdr.j2 </ACTION>
+    </COMMAND> 
+    <COMMAND name="show otdr port" help="Display otdr port information"> 
+      <PARAM name="value" help="" ptype="OTDR_NAME"></PARAM>
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_otdr.py get_otdr_port_info show_otdr.j2 ${value} </ACTION>
+    </COMMAND>
+  </VIEW>
+
+  <VIEW name="configure-view">
+      <!-- Otdr Module Entry -->
+      <COMMAND name="otdr" help="Otdr Module configuration"></COMMAND>
+
+      <COMMAND name="otdr config-common" help="Otdr common configuration"> </COMMAND>
+
+      <!-- otdr config-common scan-type <scan-type > <attribute> <value> -->
+      <COMMAND name="otdr config-common scan-type" help="scan type configuration"> 
+          <PARAM name="scan-type-name" help="" ptype="OTDR_CONFIGURABLE_SCAN_TYPE">
+            <PARAM
+              name="if-subcommands"
+              help="Scan type subcommands"
+              mode="switch"
+              ptype="SUBCOMMAND">
+                <PARAM name="acquisition-time-s" help="acquisition-time-s configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 10 ~ 180, unit: s" ptype="OTDR_ACQUISITION_TIME_S"></PARAM>
+                </PARAM>
+                <PARAM name="range-m" help="range-m configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 0 ~ 128000, unit: m" ptype="OTDR_RANGE_M"></PARAM>
+                </PARAM>
+                <PARAM name="pulse-width-ns" help="pulse-width-ns configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 10..20000, unit: ns" ptype="OTDR_PULSE_WIDTH_NS"></PARAM>
+                </PARAM>
+                <PARAM name="wavelength-mhz" help="wavelength-mhz configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 1 ~ 400000000, unit: s" ptype="OTDR_WAVELENGTH_MHZ"></PARAM>
+                </PARAM>
+                <PARAM name="sampling-resolution-m" help="sampling-resolution-m configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 0.00..160.00, unit: m" ptype="DECIMAL_FRACTION_2"></PARAM>
+                </PARAM>
+                <PARAM name="fiber-type" help="fiber-type configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="TODO" ptype="OTDR_FIBER_TYPE"></PARAM>
+                </PARAM>
+            </PARAM>
+          </PARAM>
+        <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_otdr.py patch_otdr_config_common_scan_type ${scan-type-name} ${__full_line} </ACTION>
+    </COMMAND>
+
+    <!-- otdr config-common fiber-profile <attribute> <value> -->
+    <COMMAND name="otdr config-common fiber-profile" help="fiber-profile configuration">
+        <PARAM
+            name="if-subcommands"
+            help="Fiber profile subcommands"
+            mode="switch"
+            ptype="SUBCOMMAND">
+            <PARAM name="refractive-index" help="refractive-index configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="value" help="range: 1.400000..1.700000" ptype="OTDR_REFRACTIVE_INDEX"></PARAM>
+            </PARAM>
+            <PARAM name="backscatter-index" help="backscatter-index configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="value" help="range: TODO" ptype="DECIMAL_FRACTION_2"></PARAM>
+            </PARAM>
+            <PARAM name="reflectance-threshold" help="reflectance-threshold configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="value" help="range: -65.0..-14.0, unit: db" ptype="DECIMAL_FRACTION_2"></PARAM>
+            </PARAM>
+            <PARAM name="splice-loss-threshold" help="splice-loss-threshold configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="value" help="range: 0.00..10.00, unit: db" ptype="DECIMAL_FRACTION_2"></PARAM>
+            </PARAM>
+            <PARAM name="fiber-end-threshold" help="fiber-end-threshold configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="value" help="range: 1.00..65.00, unit: db" ptype="DECIMAL_FRACTION_2"></PARAM>
+            </PARAM>
+        </PARAM>
+        <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_otdr.py patch_otdr_config_common_fiber_profile ${__full_line} </ACTION>
+    </COMMAND>
+
+    <!-- otdr config port <port-name> <attribute> <value> -->
+    <COMMAND name="otdr config" help="Otdr customized configuration"></COMMAND>
+    <COMMAND name="otdr config port" help="Otdr port customized configuration"> 
+        <PARAM name="otdr-name" help="" ptype="OTDR_NAME">  
+            <PARAM
+                name="if-subcommands"
+                help="Fiber profile subcommands"
+                mode="switch"
+                ptype="SUBCOMMAND">
+                <!-- scan-type related config paras -->
+                <PARAM name="acquisition-time-s" help="acquisition-time-s configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 10 ~ 180, unit: s" ptype="OTDR_ACQUISITION_TIME_S"></PARAM>
+                </PARAM>
+                <PARAM name="range-m" help="range-m configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 0 ~ 128000, unit: m" ptype="OTDR_RANGE_M"></PARAM>
+                </PARAM>
+                <PARAM name="pulse-width-ns" help="pulse-width-ns configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 10..20000, unit: ns" ptype="OTDR_PULSE_WIDTH_NS"></PARAM>
+                </PARAM>
+                <PARAM name="wavelength-mhz" help="wavelength-mhz configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 1 ~ 400000000, unit: s" ptype="OTDR_WAVELENGTH_MHZ"></PARAM>
+                </PARAM>
+                <PARAM name="sampling-resolution-m" help="sampling-resolution-m configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 0.00..160.00, unit: m" ptype="DECIMAL_FRACTION_2"></PARAM>
+                </PARAM>
+                <PARAM name="fiber-type" help="fiber-type configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="TODO" ptype="OTDR_FIBER_TYPE"></PARAM>
+                </PARAM>
+                <!-- fiber related config paras -->
+                <PARAM name="refractive-index" help="refractive-index configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 1.400000..1.700000" ptype="OTDR_REFRACTIVE_INDEX"> </PARAM>
+                </PARAM>
+                <PARAM name="backscatter-index" help="backscatter-index configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: TODO" ptype="DECIMAL_FRACTION_2"></PARAM>
+                </PARAM>
+                <PARAM name="reflectance-threshold" help="reflectance-threshold configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: -65.0..-14.0, unit: db" ptype="DECIMAL_FRACTION_2"> </PARAM>
+                </PARAM>
+                <PARAM name="splice-loss-threshold" help="splice-loss-threshold configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 0.00..10.00, unit: db" ptype="DECIMAL_FRACTION_2"> </PARAM>
+                </PARAM>
+                <PARAM name="fiber-end-threshold" help="fiber-end-threshold configuration" mode="subcommand" ptype="SUBCOMMAND">
+                  <PARAM name="value" help="range: 1.00..65.00, unit: db" ptype="DECIMAL_FRACTION_2"> </PARAM>
+                </PARAM>
+            </PARAM>        
+        </PARAM>
+        <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_otdr.py patch_otdr_config_port_customized ${__full_line} </ACTION>
+    </COMMAND>
+
+    <COMMAND name="otdr exec" help="Otdr execute"></COMMAND>
+    <COMMAND name="otdr exec scan" help="Otdr scan execute">
+        <PARAM
+                name="if-subcommands"
+                help="Otdr scan operation subcommands"
+                mode="switch"
+                ptype="SUBCOMMAND">
+          <PARAM name="start" help="otdr scan start" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="port" help="otdr scan port" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="otdr-name" help="" ptype="OTDR_NAME"></PARAM>
+            </PARAM>
+            <PARAM name="scan-type" help="otdr scan type" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="scan-type-name" help="" ptype="OTDR_SCAN_TYPE_ALL"></PARAM>
+            </PARAM>
+          </PARAM>
+          <PARAM name="stop" help="otdr scan start" mode="subcommand" ptype="SUBCOMMAND">
+          </PARAM>
+        </PARAM>
+        <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_otdr.py post_rpc_otdr_scan ${__full_line} </ACTION>
+    </COMMAND>
+  </VIEW>
+</CLISH_MODULE>

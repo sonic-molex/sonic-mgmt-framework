@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+  <VIEW name="enable-view">
+    <COMMAND name="show attenuator" help="Display attenuator information"> 
+      <PARAM name="if-voa-name" help="" mode="switch" ptype="SUBCOMMAND">
+         <PARAM name="voa0-0" help="Display VOA0-0 information" ptype="SUBCOMMAND" mode="subcommand"></PARAM>
+         <PARAM name="voa0-1" help="Display VOA0-1 information" ptype="SUBCOMMAND" mode="subcommand"></PARAM>
+      </PARAM>
+      <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_attenuator.py get_openconfig_optical_attenuator_optical_attenuator_attenuators_attenuator show_attenuator.j2 ${if-voa-name} </ACTION>
+    </COMMAND>
+  </VIEW>
+
+  <VIEW name="configure-view">
+      <!-- Attenuator Module Entry -->
+      <COMMAND
+          name="attenuator"
+          help="Attenuator Module configuration"
+          >
+        <PARAM name="attn-subcmd-1st" help="" mode="switch" ptype="SUBCOMMAND">
+          <!-- attenuator voa1 attn <value> -->
+          <PARAM name="voa0-0" help="VOA0-0 configuration" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="attenuation" help="attenuation configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="attn-value" help="attenuation value ([0,25.50]), Unit: dB" ptype="ATTN_RANGE">
+              </PARAM>
+            </PARAM>
+          </PARAM>
+          <!-- attenuator voa2 attn <value> -->
+          <PARAM name="voa0-1" help="VOA0-1 configuration" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="attenuation" help="attenuation configuration" mode="subcommand" ptype="SUBCOMMAND">
+              <PARAM name="attn-value" help="attenuation value ([0,25.50]), Unit: dB" ptype="ATTN_RANGE">
+              </PARAM>
+            </PARAM>
+          </PARAM>
+        </PARAM>
+        <ACTION>python3 $SONIC_CLI_ROOT/sonic_cli_attenuator.py patch_openconfig_optical_attenuator_optical_attenuator_attenuators_attenuator_config_attenuation ${attn-value} ${__full_line} </ACTION>
+      </COMMAND>
+  </VIEW>
+</CLISH_MODULE>

@@ -1,0 +1,123 @@
+{# --- Define variables with defalut values --- #}
+{% set str_unit_db = 'dB' %}
+{% set str_unit_dbm = 'dBm' %}
+{% set str_unit_ma = 'mA' %}
+{% set cfg_ns = namespace(type='N/A', target_gain='N/A', target_gain_tilt='N/A', gain_range='N/A', amp_mode='N/A', target_output_power='N/A', enabled='N/A', fiber_type_profile='N/A', autolos='N/A', apr_enabled='N/A') %}
+{% set state_ns = namespace(type='N/A', target_gain='N/A', target_gain_tilt='N/A', gain_range='N/A', amp_mode='N/A', target_output_power='N/A', enabled='N/A', fiber_type_profile='N/A', autolos='N/A', apr_enabled='N/A') %}
+{% set state_actual_gain_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_actual_gain_tilt_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_input_power_total_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_input_power_c_band_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_output_power_total_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_output_power_c_band_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_laser_bias_current_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_optical_return_loss_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{# --- Parse data from json_output  --- #}
+{% set edfa_list = json_output['openconfig-optical-amplifier:amplifier'] %}
+{% for edfa in edfa_list %}
+{% set edfa_config = edfa['config'] %}
+{% set edfa_state = edfa['state'] %}
+{% set edfa_name = edfa['name'] %}
+{# --- Parse edfa config data --- #}
+{% if 'type' in edfa_config %}
+{% set cfg_ns.type = edfa_config['type'].split(':')[1] %}
+{% endif %}
+{% if 'target-gain' in edfa_config %}
+{#% set cfg_ns.target_gain = '%0.2f' | format(edfa_config['target-gain']|float) + str_unit_db %#}
+{% set cfg_ns.target_gain = '%s' | format(edfa_config['target-gain']) + str_unit_db %}
+{% endif %}
+{% if 'target-gain-tilt' in edfa_config %}
+{% set cfg_ns.target_gain_tilt = '%s' | format(edfa_config['target-gain-tilt']) + str_unit_db %}
+{% endif %}
+{% if 'gain-range' in edfa_config %}
+{% set cfg_ns.gain_range = edfa_config['gain-range'].split(':')[1] %}
+{% endif %}
+{% if 'amp-mode' in edfa_config %}
+{% set cfg_ns.amp_mode = edfa_config['amp-mode'].split(':')[1] %}
+{% endif %}
+{% if 'target-output-power' in edfa_config %}
+{% set cfg_ns.target_output_power = '%s' | format(edfa_config['target-output-power']) + str_unit_dbm %}
+{% endif %}
+{% if 'enabled' in edfa_config %}
+{% set cfg_ns.enabled = edfa_config['enabled'] %}
+{#{% if edfa_config['enabled'] == True %}#}
+{#{% set cfg_ns.enabled = 'enable' %}#}
+{#{% else %}#}
+{#{% set cfg_ns.enabled = 'disable' %}#}
+{#{% endif %}#}
+{% endif %}
+{% if 'fiber-type-profile' in edfa_config %}
+{% set cfg_ns.fiber_type_profile = edfa_config['fiber-type-profile'].split(':')[1] %}
+{% endif %}
+{% if 'com-oplink-amplifier-ext:autolos' in edfa_config %}
+{% set cfg_ns.autolos = edfa_config['com-oplink-amplifier-ext:autolos'] %}
+{% endif %}
+{% if 'com-oplink-amplifier-ext:apr-enabled' in edfa_config %}
+{% set cfg_ns.apr_enabled = edfa_config['com-oplink-amplifier-ext:apr-enabled'] %}
+{% endif %}
+{# --- Parse edfa state data --- #}
+{% if 'actual-gain' in edfa_state %}
+{% if 'instant' in edfa_state['actual-gain'] %}
+{% set state_actual_gain_ns.instant = '%s' | format(edfa_state['actual-gain']['instant']) + str_unit_db %}
+{% endif %}
+{% endif %}
+{% if 'actual-gain-tilt' in edfa_state %}
+{% if 'instant' in edfa_state['actual-gain-tilt'] %}
+{% set state_actual_gain_tilt_ns.instant = '%s' | format(edfa_state['actual-gain-tilt']['instant']) + str_unit_db %}
+{% endif %}
+{% endif %}
+{% if 'input-power-total' in edfa_state %}
+{% if 'instant' in edfa_state['input-power-total'] %}
+{% set state_input_power_total_ns.instant = '%s' | format(edfa_state['input-power-total']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'input-power-c-band' in edfa_state %}
+{% if 'instant' in edfa_state['input-power-c-band'] %}
+{% set state_input_power_c_band_ns.instant = '%s' | format(edfa_state['input-power-c-band']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'output-power-total' in edfa_state %}
+{% if 'instant' in edfa_state['output-power-total'] %}
+{% set state_output_power_total_ns.instant = '%s' | format(edfa_state['output-power-total']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'output-power-c-band' in edfa_state %}
+{% if 'instant' in edfa_state['output-power-c-band'] %}
+{% set state_output_power_c_band_ns.instant = '%s' | format(edfa_state['output-power-c-band']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'laser-bias-current' in edfa_state %}
+{% if 'instant' in edfa_state['laser-bias-current'] %}
+{% set state_laser_bias_current_ns.instant = '%s' | format(edfa_state['laser-bias-current']['instant']) + str_unit_ma %}
+{% endif %}
+{% endif %}
+{% if 'optical-return-loss' in edfa_state %}
+{% if 'instant' in edfa_state['optical-return-loss'] %}
+{% set state_optical_return_loss_ns.instant = '%s' | format(edfa_state['optical-return-loss']['instant']) + str_unit_db %}
+{% endif %}
+{% endif %}
+
+{# --- Output data --- #}
+{{edfa_name}} {{' config'}}
+{{'    '}}{{'type'.ljust(20)}}{{' : '}}{{cfg_ns.type}}
+{{'    '}}{{'target-gain'.ljust(20)}}{{' : '}}{{cfg_ns.target_gain}}
+{{'    '}}{{'target-gain-tilt'.ljust(20)}}{{' : '}}{{cfg_ns.target_gain_tilt}}
+{{'    '}}{{'gain-range'.ljust(20)}}{{' : '}}{{cfg_ns.gain_range}}
+{{'    '}}{{'amp-mode'.ljust(20)}}{{' : '}}{{cfg_ns.amp_mode}}
+{{'    '}}{{'target-output-power'.ljust(20)}}{{' : '}}{{cfg_ns.target_output_power}}
+{{'    '}}{{'enabled'.ljust(20)}}{{' : '}}{{cfg_ns.enabled}}
+{{'    '}}{{'fiber-type-profile'.ljust(20)}}{{' : '}}{{cfg_ns.fiber_type_profile}}
+{{'    '}}{{'autolos'.ljust(20)}}{{' : '}}{{cfg_ns.autolos}}
+{{'    '}}{{'apr-enabled'.ljust(20)}}{{' : '}}{{cfg_ns.apr_enabled}}
+{{' '}}
+{{edfa_name}} {{' state'}}
+{{'    '}}{{'actual-gain'.ljust(20)}}{{' : '}}{{state_actual_gain_ns.instant}}
+{{'    '}}{{'actual-gain-tilt'.ljust(20)}}{{' : '}}{{state_actual_gain_tilt_ns.instant}}
+{{'    '}}{{'input-power-total'.ljust(20)}}{{' : '}}{{state_input_power_total_ns.instant}}
+{{'    '}}{{'input-power-c-band'.ljust(20)}}{{' : '}}{{state_input_power_c_band_ns.instant}}
+{{'    '}}{{'output-power-total'.ljust(20)}}{{' : '}}{{state_output_power_total_ns.instant}}
+{{'    '}}{{'output-power-c-band'.ljust(20)}}{{' : '}}{{state_output_power_c_band_ns.instant}}
+{{'    '}}{{'laser-bias-current'.ljust(20)}}{{' : '}}{{state_laser_bias_current_ns.instant}}
+{{'    '}}{{'optical-return-loss'.ljust(20)}}{{' : '}}{{state_optical_return_loss_ns.instant}}
+{{' '}}
+{% endfor %}

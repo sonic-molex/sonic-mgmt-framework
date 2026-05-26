@@ -1,0 +1,65 @@
+{# --- Define variables with defalut values --- #}
+{% set str_unit_db = 'dB' %}
+{% set str_unit_dbm = 'dBm' %}
+{% set str_unit_ma = 'mA' %}
+{% set cfg_ns = namespace(enabled='N/A') %}
+{% set state_ns = namespace(enabled='N/A', output_frequency='N/A', drop_power='N/A', add_power='N/A') %}
+{% set state_input_power_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_output_power_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{% set state_laser_bias_current_ns = namespace(instant='N/A', avg='N/A', min='N/A', max='N/A', interval='N/A', min_time='N/A', max_time='N/A') %}
+{# --- Parse data from json_output  --- #}
+{% set osc_list = json_output['openconfig-optical-amplifier:supervisory-channel'] %}
+{% for osc in osc_list %}
+{% set osc_config = osc['config'] %}
+{% set osc_state = osc['state'] %}
+{% set osc_name = osc['interface'] %}
+{# --- Parse osc config data --- #}
+{% if 'com-oplink-amplifier-ext:enabled' in osc_config %}
+{% set cfg_ns.enabled = osc_config['com-oplink-amplifier-ext:enabled'] %}
+{#{% if osc_config['com-oplink-amplifier-ext:enabled'] == True %}#}
+{#{% set cfg_ns.enabled = 'enable' %}#}
+{#{% else %}#}
+{#{% set cfg_ns.enabled = 'disable' %}#}
+{#{% endif %}#}
+{% endif %}
+{# --- Parse osc state data --- #}
+{% if 'input-power' in osc_state %}
+{% if 'instant' in osc_state['input-power'] %}
+{% set state_input_power_ns.instant = '%s' | format(osc_state['input-power']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'output-power' in osc_state %}
+{% if 'instant' in osc_state['output-power'] %}
+{% set state_output_power_ns.instant = '%s' | format(osc_state['output-power']['instant']) + str_unit_dbm %}
+{% endif %}
+{% endif %}
+{% if 'laser-bias-current' in osc_state %}
+{% if 'instant' in osc_state['laser-bias-current'] %}
+{% set state_laser_bias_current_ns.instant = '%s' | format(osc_state['laser-bias-current']['instant']) + str_unit_ma %}
+{% endif %}
+{% endif %}
+{% if 'com-oplink-amplifier-ext:add-power' in osc_state %}
+{% set state_ns.add_power = '%s' | format(osc_state['com-oplink-amplifier-ext:add-power']) + str_unit_dbm %}
+{% endif %}
+{% if 'com-oplink-amplifier-ext:drop-power' in osc_state %}
+{% set state_ns.drop_power = '%s' | format(osc_state['com-oplink-amplifier-ext:drop-power']) + str_unit_dbm %}
+{% endif %}
+{% if 'output-frequency' in osc_state %}
+{% set state_ns.output_frequency = '%s' | format(osc_state['output-frequency']) + str_unit_dbm %}
+{% endif %}
+
+{# --- Output data --- #}
+{{osc_name}} {{' config'}}
+{{'    '}}{{'enabled'.ljust(20)}}{{' : '}}{{cfg_ns.enabled}}
+{{' '}}
+{{osc_name}} {{' state'}}
+{{'    '}}{{'input-power'.ljust(20)}}{{' : '}}{{state_input_power_ns.instant}}
+{{'    '}}{{'output-power'.ljust(20)}}{{' : '}}{{state_output_power_ns.instant}}
+{{'    '}}{{'add-power'.ljust(20)}}{{' : '}}{{state_ns.add_power}}
+{{'    '}}{{'drop-power'.ljust(20)}}{{' : '}}{{state_ns.drop_power}}
+{{'    '}}{{'output-frequency'.ljust(20)}}{{' : '}}{{state_ns.output_frequency}}
+{{'    '}}{{'laser-bias-current'.ljust(20)}}{{' : '}}{{state_laser_bias_current_ns.instant}}
+{{' '}}
+{% endfor %}
+
+
